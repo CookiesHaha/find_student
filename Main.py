@@ -3,6 +3,7 @@ import random
 import string
 from PIL import Image
 import os
+import pickle
 
 class Background(Enum):
     STAR = {'value':'star','image_path':  os.path.abspath('./img/Background/01.png')}
@@ -50,15 +51,31 @@ class Classroom:
     def add_student(self, student):
         self.students.append(student)
 
-    def find_student_by_attributes(self, background, animals, wearing):
-        for student in self.students:
-            if (
-                student.background == background
-                and student.animals == animals
-                and student.wearing == wearing 
-            ):
-                return student
-            return None
+    def find_student(self, background, animals, wearing):
+        # 检查输入的属性是否合法
+        if background not in [bg.value['value'] for bg in Background]:
+            print(f"Error: Invalid background value '{background}'.")
+            return
+        if animals not in [ani.value['value'] for ani in Animals]:
+            print(f"Error: Invalid animals value '{animals}'.")
+            return
+        if wearing not in [wear.value['value'] for wear in Wearing]:
+            print(f"Error: Invalid wearing value '{wearing}'.")
+            return
+
+        # 查找学生
+        matching_students = [student for student in self.students if
+                             student.background.value['value'] == background
+                             and student.animals.value['value'] == animals
+                             and student.wearing.value['value'] == wearing]
+
+        if not matching_students:
+            print(f"No student found with background '{background}', animals '{animals}', wearing '{wearing}'.")
+            return
+
+        # 返回找到的学生信息
+        for student in matching_students:
+            print(f"Student ID: {student.stu_id}, Name: {student.name}, Avatar: {student.avatar}")
 
 def generate_avatar(background_path, animal_path, wearing_path, output_path):
     # 打开三张图片
@@ -108,12 +125,31 @@ def generate_random_student(existing_students):
     return Student(stu_id, name, background, animals, wearing, avatar)
 
 if __name__ == "__main__":
+
+    # 生成并保存学生数据
+    output_folder = "img/Avatar"
+    students_filename = "students_data.pkl"
+   
     classroom = Classroom()
     existing_students = {"backgrounds": [], "animals": [], "wearings": []}
-
-    for _ in range(24):
-        random_student = generate_random_student(existing_students)
-        classroom.add_student(random_student)
     
-    for student in classroom.students:
-        print(student)
+    # for _ in range(24):
+    #     random_student = generate_random_student(existing_students)
+    #     classroom.add_student(random_student)
+    
+    # # 保存学生数据到文件
+    # with open(students_filename, 'wb') as file:
+    #     pickle.dump(classroom.students, file)
+
+    # 在另一次执行脚本中加载学生数据
+    with open(students_filename, 'rb') as file:
+        classroom.students = pickle.load(file)
+
+    # for student in classroom.students:
+    #     print(student.name)
+    
+    background_to_find = "galaxy"
+    animals_to_find = "cat"
+    wearing_to_find = "rainbow"
+
+    classroom.find_student(background_to_find, animals_to_find, wearing_to_find)
