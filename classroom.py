@@ -32,3 +32,5 @@ class Classroom:
         # 返回找到的学生信息
         for student in matching_students:
             print(f"Student ID: {student.stu_id}, Name: {student.name}, Avatar: {student.avatar}")
+        
+        return matching_students
