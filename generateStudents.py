@@ -96,19 +96,6 @@ if __name__ == "__main__":
     with open(students_filename, 'wb') as file:
         pickle.dump(classroom.students, file)
 
-    # 在另一次执行脚本中加载学生数据
-    # with open(students_filename, 'rb') as file:
-    #     classroom.students = pickle.load(file)
-
-    # for student in classroom.students:
-    #     print(student.name)
-    
-    # background_to_find = "galaxy"
-    # animals_to_find = "cat"
-    # wearing_to_find = "rainbow"
-
-    # classroom.find_student(background_to_find, animals_to_find, wearing_to_find)
-
     for student in classroom.students:
         print(student)
         
