@@ -4,13 +4,10 @@ import random
 from PIL import Image
 import os
 import pickle
-from frontend import Frontend
-import tkinter as tk
-from tkinter import ttk
 
 
 
-def generate_avatar(background_path, animal_path, wearing_path, output_path):
+def generate_avatar(background_path, animal_path, wearing_path, output_folder, name):
     # 打开三张图片
     background_image = Image.open(background_path).convert("RGBA")
     animal_image = Image.open(animal_path).convert("RGBA")
@@ -29,17 +26,34 @@ def generate_avatar(background_path, animal_path, wearing_path, output_path):
     new_image = Image.new("RGBA", (new_width, new_height), (255, 255, 255, 0))
 
     # 将三张图片堆叠到新图片上
-    new_image.paste(background_image, ((new_width - bg_width) // 2, (new_height - bg_height) // 2), background_image)
-    new_image.paste(animal_image, ((new_width - ani_width) // 2, (new_height - ani_height) // 2), animal_image)
-    new_image.paste(wearing_image, ((new_width - wear_width) // 2, (new_height - wear_height) // 2), wearing_image)
+    new_image.paste(
+        background_image,
+        ((new_width - bg_width) // 2, (new_height - bg_height) // 2),
+        background_image,
+    )
+    new_image.paste(
+        animal_image,
+        ((new_width - ani_width) // 2, (new_height - ani_height) // 2),
+        animal_image,
+    )
+    new_image.paste(
+        wearing_image,
+        ((new_width - wear_width) // 2, (new_height - wear_height) // 2),
+        wearing_image,
+    )
 
     # 合并图片
-    final_image = Image.alpha_composite(Image.new("RGBA", new_image.size, (255, 255, 255, 255)), new_image)
+    final_image = Image.alpha_composite(
+        Image.new("RGBA", new_image.size, (255, 255, 255, 255)), new_image
+    )
 
     # 保存新图片
+    os.makedirs(output_folder, exist_ok=True)
+    output_path = f"{output_folder}/{name}.png"
     final_image.save(output_path)
-        
-def generate_random_student(existing_students):
+
+
+def generate_random_student(existing_students, output_folder):
     stu_id = f"A{random.randint(100, 999)}"
     background = random.choice(list(Background))
     animals = random.choice(list(Animals))
@@ -48,38 +62,43 @@ def generate_random_student(existing_students):
     existing_students["backgrounds"].append(background)
     existing_students["animals"].append(animals)
     existing_students["wearings"].append(wearing)
-    
-    avatar_output_path = f"avatar_{stu_id}.png"
-    generate_avatar(background.value["image_path"], animals.value["image_path"], wearing.value["image_path"], avatar_output_path)
-    avatar = avatar_output_path
-   
-    name = f"{background} {animals} {wearing}"
+    name = (
+        f"{background.value['value']} {wearing.value['value']} {animals.value['value']}"
+    )
 
+    avatar_output_path = f"{output_folder}"
+
+    generate_avatar(
+        background.value["image_path"],
+        animals.value["image_path"],
+        wearing.value["image_path"],
+        avatar_output_path,
+        name,
+    )
+    avatar = f"{output_folder}/{name}.png"
     return Student(stu_id, name, background, animals, wearing, avatar)
 
 if __name__ == "__main__":
 
     # 生成并保存学生数据
-    output_folder = "img/Avatar"
+    output_folder = os.path.abspath("./img/Avatar")
     students_filename = "students_data.pkl"
-   
-    root = ttk.Tk()
-    classroom = Classroom()
-    frontend = Frontend(root, classroom)
-    root.mainloop()
     existing_students = {"backgrounds": [], "animals": [], "wearings": []}
     
-    # for _ in range(24):
-    #     random_student = generate_random_student(existing_students)
-    #     classroom.add_student(random_student)
+    classroom = Classroom()
     
-    # # 保存学生数据到文件
-    # with open(students_filename, 'wb') as file:
-    #     pickle.dump(classroom.students, file)
+    for _ in range(24):
+        random_student = generate_random_student(existing_students, output_folder)
+        classroom.add_student(random_student)
+    
+    
+    # 保存学生数据到文件
+    with open(students_filename, 'wb') as file:
+        pickle.dump(classroom.students, file)
 
     # 在另一次执行脚本中加载学生数据
-    with open(students_filename, 'rb') as file:
-        classroom.students = pickle.load(file)
+    # with open(students_filename, 'rb') as file:
+    #     classroom.students = pickle.load(file)
 
     # for student in classroom.students:
     #     print(student.name)
@@ -90,4 +109,14 @@ if __name__ == "__main__":
 
     # classroom.find_student(background_to_find, animals_to_find, wearing_to_find)
 
-    
+    for student in classroom.students:
+        print(student)
+        
+        
+    # background_to_find = "Cloud"
+    # wearing_to_find = "Flash"
+    # animals_to_find = "Graff"
+
+    # find_student(
+    #     classroom.students, background_to_find, animals_to_find, wearing_to_find
+    # )
