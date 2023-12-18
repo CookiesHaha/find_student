@@ -3,6 +3,8 @@ from tkinter.ttk import *
 import pickle
 from student import Student, Background, Animals, Wearing
 from classroom import Classroom
+from random import shuffle
+
 class Frontend:
     
     def __init__(self) -> None:
@@ -29,7 +31,7 @@ class Frontend:
         root = Tk()
         root.title("Find Student")
         width = 600
-        height = 500
+        height = 600
         screenwidth = root.winfo_screenwidth()
         screenheight = root.winfo_screenheight()
         geometry = '%dx%d+%d+%d' % (width, height, (screenwidth - width) / 2, (screenheight - height) / 2)
@@ -66,13 +68,30 @@ class Frontend:
     def __config_lable(self, text, x, y):
         config_lable = Label(self.root, text=text)
         config_lable.place(x=x, y=y, width=1000, height=24)
+
+    def __imgage_display(self, image_path, x, y, width, height):
+        image = PhotoImage(file=image_path)
+        image_lable = Label(self.root, image=image)
+        image_lable.image=image
+        image_lable.place(x=x, y=y, width=width, height=height)
+
+    def shuffle_avatars(self, x, y, width, height):
+        # Shuffle the list of avatars
+        avatars = [student.avatar for student in self.classroom.students]
+        shuffle(avatars)
+
+        # Display the shuffled avatars
+        for avatar_path in avatars:
+            self.__imgage_display(avatar_path,  x=x, y=y, width=width,height=height)
+            self.root.update()  # Force update to show the avatar
+            self.root.after(100)  # Adjust the delay time (in milliseconds) between avatars
     
     def find_student_command(self):
         # 获取下拉框的当前值
         background_value = self.background_dropdown.get()
         animals_value = self.animals_dropdown.get()
         wearing_value = self.wearing_dropdown.get()
-
+        self.shuffle_avatars(x=180, y=300, width=280,height=280)
         # 调用Classroom中的find_student方法
         matching_student = self.classroom.find_student(background_value, animals_value, wearing_value)
         # for student in matching_student:
@@ -81,12 +100,13 @@ class Frontend:
         if matching_student:
             # 显示第一个匹配学生的信息（你可以根据需要选择其他方式显示多个匹配学生的信息）
             student = matching_student
-            student_info = (f"Student ID: {student.stu_id}, Name: {student.name}")
+            student_info = f"Student ID: {student.stu_id}, Name: {student.name}"
             print(student_info)
             # 显示信息
             self.__config_lable(text=student_info, x=100, y=280)
+            self.__imgage_display(student.avatar,  x=180, y=300, width=280,height=280)
         else:
-            no_student_info = ("No matching student found.")
+            no_student_info = "No matching student found."
             print(no_student_info)
             self.__config_lable(text=no_student_info, x=100, y=280)
         print(background_value, animals_value, wearing_value)
