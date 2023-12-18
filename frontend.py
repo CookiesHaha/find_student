@@ -23,7 +23,7 @@ class Frontend:
         self.wearing_label = self.__create_label("Wearing", 100, 200)
         self.wearing_dropdown = self.__create_dropdown([bg.value['value'] for bg in Wearing], 200, 200)
 
-        self.find_student = self.__create_button("Find",self.find_student_command, 250, 250)
+        self.find_student = self.__create_button("Find",self.find_student_command, 250, 240)
 
     def __win(self):
         root = Tk()
@@ -63,6 +63,10 @@ class Frontend:
         button.place(x=x, y=y, width=120, height=30)
         return button
     
+    def __config_lable(self, text, x, y):
+        config_lable = Label(self.root, text=text)
+        config_lable.place(x=x, y=y, width=1000, height=24)
+    
     def find_student_command(self):
         # 获取下拉框的当前值
         background_value = self.background_dropdown.get()
@@ -71,19 +75,20 @@ class Frontend:
 
         # 调用Classroom中的find_student方法
         matching_student = self.classroom.find_student(background_value, animals_value, wearing_value)
-        for student in matching_student:
-            print(f"Student ID: {student.stu_id}, Name: {student.name}, Avatar: {student.avatar}")
-
-        # if matching_student:
-        #     # 显示第一个匹配学生的信息（你可以根据需要选择其他方式显示多个匹配学生的信息）
-        #     student = matching_student
+        # for student in matching_student:
         #     print(f"Student ID: {student.stu_id}, Name: {student.name}, Avatar: {student.avatar}")
-        
-        #     # 你可以在这里更新你的GUI部件，例如一个Label，来显示学生信息
-        #     # self.display_label.config(text=student_info)
-        # else:
-        #     print("No matching student found.")
 
+        if matching_student:
+            # 显示第一个匹配学生的信息（你可以根据需要选择其他方式显示多个匹配学生的信息）
+            student = matching_student
+            student_info = (f"Student ID: {student.stu_id}, Name: {student.name}")
+            print(student_info)
+            # 显示信息
+            self.__config_lable(text=student_info, x=100, y=280)
+        else:
+            no_student_info = ("No matching student found.")
+            print(no_student_info)
+            self.__config_lable(text=no_student_info, x=100, y=280)
         print(background_value, animals_value, wearing_value)
     
 if __name__ == "__main__":

@@ -20,17 +20,13 @@ class Classroom:
             return
 
         # 查找学生
-        matching_students = [student for student in self.students if
-                             student.background.value['value'] == background
-                             and student.animals.value['value'] == animals
-                             and student.wearing.value['value'] == wearing]
+        for student in self.students:
+            if student.background.value['value'] == background and \
+            student.animals.value['value'] == animals and \
+            student.wearing.value['value'] == wearing:
+                # 返回找到的学生信息
+                print(f"Student ID: {student.stu_id}, Name: {student.name}, Avatar: {student.avatar}")
+                return student
 
-        if not matching_students:
-            print(f"No student found with background '{background}', animals '{animals}', wearing '{wearing}'.")
-            return
-
-        # 返回找到的学生信息
-        for student in matching_students:
-            print(f"Student ID: {student.stu_id}, Name: {student.name}, Avatar: {student.avatar}")
-        
-        return matching_students
+        print(f"No student found with background '{background}', animals '{animals}', wearing '{wearing}'.")
+        return None
