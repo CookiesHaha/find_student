@@ -75,23 +75,28 @@ class Frontend:
         image_lable.image=image
         image_lable.place(x=x, y=y, width=width, height=height)
 
-    def shuffle_avatars(self, x, y, width, height):
+    def __shuffle_image(self, x, y, width, height):
+        
+        # 设置洗牌的速度参数
+        initial_speed = 50  # 初始速度
+        acceleration = 10  # 加速度
         # Shuffle the list of avatars
         avatars = [student.avatar for student in self.classroom.students]
         shuffle(avatars)
-
+        
         # Display the shuffled avatars
         for avatar_path in avatars:
             self.__imgage_display(avatar_path,  x=x, y=y, width=width,height=height)
             self.root.update()  # Force update to show the avatar
-            self.root.after(100)  # Adjust the delay time (in milliseconds) between avatars
-    
+            self.root.after(initial_speed)  # Adjust the delay time (in milliseconds) between avatars
+            initial_speed += acceleration
+
     def find_student_command(self):
         # 获取下拉框的当前值
         background_value = self.background_dropdown.get()
         animals_value = self.animals_dropdown.get()
         wearing_value = self.wearing_dropdown.get()
-        self.shuffle_avatars(x=180, y=300, width=280,height=280)
+        self.__shuffle_image(x=180, y=300, width=280,height=280)
         # 调用Classroom中的find_student方法
         matching_student = self.classroom.find_student(background_value, animals_value, wearing_value)
         # for student in matching_student:
