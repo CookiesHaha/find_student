@@ -1,11 +1,9 @@
 from student import Student, Background, Animals, Wearing
 from classroom import Classroom
+from studentModel import StudentModel
 import random
 from PIL import Image
 import os
-import pickle
-
-
 
 def generate_avatar(background_path, animal_path, wearing_path, output_folder, name):
     # 打开三张图片
@@ -53,18 +51,18 @@ def generate_avatar(background_path, animal_path, wearing_path, output_folder, n
     final_image.save(output_path)
 
 
-def generate_random_student(existing_students, output_folder):
-    stu_id = f"A{random.randint(100, 999)}"
+def generate_random_student(student_model, output_folder):
+    while True:
+        stu_id = f"A{random.randint(100, 999)}"
+
+        if not student_model.check_student_existence(stu_id):
+            break
+
     background = random.choice(list(Background))
     animals = random.choice(list(Animals))
     wearing = random.choice(list(Wearing))
 
-    existing_students["backgrounds"].append(background)
-    existing_students["animals"].append(animals)
-    existing_students["wearings"].append(wearing)
-    name = (
-        f"{background.value['value']} {wearing.value['value']} {animals.value['value']}"
-    )
+    name = f"{background.value['value']}_{wearing.value['value']}_{animals.value['value']}"
 
     avatar_output_path = f"{output_folder}"
 
@@ -76,28 +74,28 @@ def generate_random_student(existing_students, output_folder):
         name,
     )
     avatar = f"{output_folder}/{name}.png"
+
+    # Create a new student using the StudentModel
+    new_student = Student(stu_id, name, background, animals, wearing, avatar)
+    student_model.insert_student(new_student)
     return Student(stu_id, name, background, animals, wearing, avatar)
 
 if __name__ == "__main__":
-
-    # 生成并保存学生数据
     output_folder = os.path.abspath("./img/Avatar")
-    students_filename = "students_data.pkl"
-    existing_students = {"backgrounds": [], "animals": [], "wearings": []}
-    
-    classroom = Classroom()
-    
+    db_path = "students_data.db"
+    student_model = StudentModel(db_path)
+
     for _ in range(24):
-        random_student = generate_random_student(existing_students, output_folder)
-        classroom.add_student(random_student)
-    
+        generate_random_student(student_model, output_folder)
+
+    student_model.close_connection()
     
     # 保存学生数据到文件
-    with open(students_filename, 'wb') as file:
-        pickle.dump(classroom.students, file)
+    # with open(students_filename, 'wb') as file:
+    #     pickle.dump(classroom.students, file)
 
-    for student in classroom.students:
-        print(student)
+    # for student in classroom.students:
+    #     print(student)
         
         
     # background_to_find = "Cloud"

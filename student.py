@@ -8,11 +8,11 @@ class Background(Enum):
         "image_path": os.path.abspath("./img/Background/02.png"),
     }
     NEWWORLD = {
-        "value": "New World",
+        "value": "NewWorld",
         "image_path": os.path.abspath("./img/Background/03.png"),
     }
     NEXTDAY = {
-        "value": "Next Day",
+        "value": "NextDay",
         "image_path": os.path.abspath("./img/Background/04.png"),
     }
     CLOUD = {"value": "Cloud", "image_path": os.path.abspath("./img/Background/05.png")}
@@ -49,7 +49,15 @@ class Student:
         self.animals = animals
         self.wearing = wearing
         self.avatar = avatar
-
+    
+    def get_relative_avatar_path(self):
+        # Returns the relative path of the avatar image
+        return f"img/Avatar/{self.name}.png"
+   
+    def save_to_database(self, student_model):
+        # Save the student to the database using the StudentModel
+        student_model.insert_student(self)
+    
     def __str__(self):
         return (
             f"Student(id={self.stu_id}, name={self.name}, "

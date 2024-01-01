@@ -1,19 +1,15 @@
 from tkinter import *
 from tkinter.ttk import *
-import pickle
+import sqlite3  # 导入sqlite3库
 from student import Student, Background, Animals, Wearing
-from classroom import Classroom
+from studentModel import StudentModel
 from random import shuffle
 
 class Frontend:
     
     def __init__(self) -> None:
         self.root = self.__win()
-        self.classroom = Classroom()
-        self.students_filename = "students_data.pkl"
-    
-        with open(self.students_filename, 'rb') as file:
-            self.classroom.students = pickle.load(file)
+        self.student_model = StudentModel("students_data.db")
 
         self.title = self.__create_title("Find Student", 100, 40)
         self.background_label = self.__create_label("Background", 100, 120)
@@ -65,57 +61,52 @@ class Frontend:
         button.place(x=x, y=y, width=120, height=30)
         return button
     
-    def __config_lable(self, text, x, y):
+    def __config_label(self, text, x, y):
         config_lable = Label(self.root, text=text)
         config_lable.place(x=x, y=y, width=1000, height=24)
 
-    def __imgage_display(self, image_path, x, y, width, height):
+    def __image_display(self, image_path, x, y, width, height):
         image = PhotoImage(file=image_path)
         image_lable = Label(self.root, image=image)
         image_lable.image=image
         image_lable.place(x=x, y=y, width=width, height=height)
 
     def __shuffle_image(self, x, y, width, height):
-        
+        avatars = self.student_model.get_all_avatars()
         # 设置洗牌的速度参数
         initial_speed = 50  # 初始速度
         acceleration = 10  # 加速度
-        # Shuffle the list of avatars
-        avatars = [student.avatar for student in self.classroom.students]
-        shuffle(avatars)
         
-        # Display the shuffled avatars
+        shuffle(avatars)
+
         for avatar_path in avatars:
-            self.__imgage_display(avatar_path,  x=x, y=y, width=width,height=height)
-            self.root.update()  # Force update to show the avatar
-            self.root.after(initial_speed)  # Adjust the delay time (in milliseconds) between avatars
+            self.__image_display(avatar_path, x=x, y=y, width=width, height=height)
+            self.root.update()
+            self.root.after(initial_speed) 
             initial_speed += acceleration
 
     def find_student_command(self):
-        # 获取下拉框的当前值
         background_value = self.background_dropdown.get()
+        print(background_value)
         animals_value = self.animals_dropdown.get()
+        print(animals_value)
         wearing_value = self.wearing_dropdown.get()
-        self.__shuffle_image(x=180, y=300, width=280,height=280)
-        # 调用Classroom中的find_student方法
-        matching_student = self.classroom.find_student(background_value, animals_value, wearing_value)
-        # for student in matching_student:
-        #     print(f"Student ID: {student.stu_id}, Name: {student.name}, Avatar: {student.avatar}")
+        print(wearing_value)
+        
+        
+        self.__shuffle_image(x=180, y=300, width=280, height=280)
+        
+        matching_student = self.student_model.find_student(background_value, animals_value, wearing_value)
 
         if matching_student:
-            # 显示第一个匹配学生的信息（你可以根据需要选择其他方式显示多个匹配学生的信息）
-            student = matching_student
-            student_info = f"Student ID: {student.stu_id}, Name: {student.name}"
+            student_info = f"Student ID: {matching_student.stu_id}, Name: {matching_student.name}"
             print(student_info)
-            # 显示信息
-            self.__config_lable(text=student_info, x=100, y=280)
-            self.__imgage_display(student.avatar,  x=180, y=300, width=280,height=280)
+            self.__config_label(text=student_info, x=100, y=280)
+            self.__image_display(matching_student.avatar, x=180, y=300, width=280, height=280)
         else:
             no_student_info = "No matching student found."
             print(no_student_info)
-            self.__config_lable(text=no_student_info, x=100, y=280)
-        print(background_value, animals_value, wearing_value)
-    
+            self.__config_label(text=no_student_info, x=100, y=280)
 if __name__ == "__main__":
     output_folder = "img/Avatar"
     # students_filename = "students_data.pkl"
