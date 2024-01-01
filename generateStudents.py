@@ -63,6 +63,8 @@ def generate_random_student(student_model, output_folder):
     wearing = random.choice(list(Wearing))
 
     name = f"{background.value['value']}_{wearing.value['value']}_{animals.value['value']}"
+    chinese_name = ""
+
 
     avatar_output_path = f"{output_folder}"
 
@@ -76,17 +78,20 @@ def generate_random_student(student_model, output_folder):
     avatar = f"{output_folder}/{name}.png"
 
     # Create a new student using the StudentModel
-    new_student = Student(stu_id, name, background, animals, wearing, avatar)
+    new_student = Student(stu_id, name, chinese_name, background, animals, wearing, avatar)
     student_model.insert_student(new_student)
-    return Student(stu_id, name, background, animals, wearing, avatar)
+    return Student(stu_id, name, chinese_name, background, animals, wearing, avatar)
 
 if __name__ == "__main__":
     output_folder = os.path.abspath("./img/Avatar")
     db_path = "students_data.db"
     student_model = StudentModel(db_path)
+    # student_model.create_table()
 
-    for _ in range(24):
-        generate_random_student(student_model, output_folder)
+    # for _ in range(24):
+    #     generate_random_student(student_model, output_folder)
+    
+    student_model.set_chinese_name("A295","Tony Wang")
 
     student_model.close_connection()
     

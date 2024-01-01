@@ -70,6 +70,13 @@ class Frontend:
         image_lable = Label(self.root, image=image)
         image_lable.image=image
         image_lable.place(x=x, y=y, width=width, height=height)
+    
+    def __image_clean(self, x, y, width, height):
+        blank_image = PhotoImage(width=1, height=1)  # Create a blank image
+        blank_label = Label(self.root, image=blank_image)
+        blank_label.image = blank_image
+        blank_label.place(x=x, y=y, width=width, height=height)
+        self.root.update()  # Force update to clear the image
 
     def __shuffle_image(self, x, y, width, height):
         avatars = self.student_model.get_all_avatars()
@@ -84,6 +91,7 @@ class Frontend:
             self.root.update()
             self.root.after(initial_speed) 
             initial_speed += acceleration
+        self.__image_clean(x=x, y=y, width=width, height=height)
 
     def find_student_command(self):
         background_value = self.background_dropdown.get()

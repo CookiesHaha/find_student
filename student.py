@@ -42,25 +42,18 @@ class Wearing(Enum):
     }
 
 class Student:
-    def __init__(self, stu_id, name, background, animals, wearing, avatar):
+    def __init__(self, stu_id, name, chinese_name, background, animals, wearing, avatar):
         self.stu_id = stu_id
         self.name = name
+        self.chinese_name = chinese_name
         self.background = background
         self.animals = animals
         self.wearing = wearing
         self.avatar = avatar
-    
-    def get_relative_avatar_path(self):
-        # Returns the relative path of the avatar image
-        return f"img/Avatar/{self.name}.png"
    
-    def save_to_database(self, student_model):
-        # Save the student to the database using the StudentModel
-        student_model.insert_student(self)
-    
     def __str__(self):
         return (
-            f"Student(id={self.stu_id}, name={self.name}, "
+            f"Student(id={self.stu_id}, name={self.name}, chinese_name={self.chinese_name}"
             f"background={self.background.value}, animals={self.animals.value}, "
             f"wearing={self.wearing.value})," 
         )

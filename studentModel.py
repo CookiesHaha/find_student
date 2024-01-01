@@ -13,6 +13,7 @@ class StudentModel:
                 CREATE TABLE IF NOT EXISTS students (
                     stu_id TEXT PRIMARY KEY,
                     name TEXT NOT NULL,
+                    chinese_name TEXT DEFAULT '',
                     background TEXT NOT NULL,
                     animals TEXT NOT NULL,
                     wearing TEXT NOT NULL,
@@ -36,13 +37,13 @@ class StudentModel:
 
         students = []
         for row in cursor.fetchall():
-            stu_id, name, background, animals, wearing, avatar = row
+            stu_id, name, chinese_name, background, animals, wearing, avatar = row
             background_enum = next((m for m in Background if m.value['value'].lower() == background.lower()), None)
             animals_enum = next((m for m in Animals if m.value['value'].lower() == animals.lower()), None)
             wearing_enum = next((m for m in Wearing if m.value['value'].lower() == wearing.lower()), None)
 
             if background_enum and animals_enum and wearing_enum:
-                student = Student(stu_id, name, background_enum, animals_enum, wearing_enum, avatar)
+                student = Student(stu_id, name, chinese_name, background_enum, animals_enum, wearing_enum, avatar)
                 students.append(student)
 
         cursor.close()
@@ -87,16 +88,27 @@ class StudentModel:
         #     print(f"Database row - Background: '{background}', Animals: '{animals}', Wearing: '{wearing}'")
 
         cursor.execute('''
-            SELECT stu_id, name, avatar
+            SELECT stu_id, name, chinese_name, avatar
             FROM students
             WHERE background = ? AND animals = ? AND wearing = ?
         ''', (background, animals, wearing))
 
         result = cursor.fetchone()
         if result:
-            stu_id, name, avatar = result
-            print(f"Student ID: {stu_id}, Name: {name}, Avatar: {avatar}")
-            return Student(stu_id, name, background, animals, wearing, avatar)
+            stu_id, name, chinese_name, avatar = result
+            print(f"Student ID: {stu_id}, Name: {name}, Chinese Name: {chinese_name} Avatar: {avatar}")
+            return Student(stu_id, name, chinese_name, background, animals, wearing, avatar)
 
         print(f"No student found with background '{background}', animals '{animals}', wearing '{wearing}'.")
         return None
+    
+    def set_chinese_name(self, stu_id, chinese_name):
+        with self.connection:
+            self.connection.execute('''
+                UPDATE students
+                SET chinese_name = ?
+                WHERE stu_id = ?
+            ''', (chinese_name, stu_id))
+  
+    def close_connection(self):
+        self.connection.close()
