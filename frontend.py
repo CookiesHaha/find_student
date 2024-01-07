@@ -18,6 +18,11 @@ class CommonFrame(Frame):
         label = Label(self, text=text)
         label.place(x=x, y=y, width=80, height=24)
         return label
+    
+    def create_notification(self, text, x, y):
+        label = Label(self, text=text)
+        label.place(x=x, y=y, width=400, height=24)
+        return label
 
     def create_dropdown(self, values, x, y):
         var = StringVar()
@@ -30,6 +35,18 @@ class CommonFrame(Frame):
         button = Button(self, text=text, command=command)
         button.place(x=x, y=y, width=120, height=30)
         return button
+    
+    def create_entry(self, text,  x, y):
+        entry = Entry(self)
+        entry.insert(0, text)
+        entry.place(x=x, y=y, width=240, height=24)
+        return entry
+    
+    def reset_entry(self, entry):
+        entry.delete(0, 'end')
+
+    def reset_label(self, label):
+        label.config(text="")
 
     def config_label(self, text, x, y):
         config_label = Label(self, text=text)
@@ -94,7 +111,7 @@ class FindStudentFrame(CommonFrame):
         matching_student = self.student_model.find_student(background_value, animals_value, wearing_value)
 
         if matching_student:
-            student_info = f"Student ID: {matching_student.stu_id}, Name: {matching_student.name}"
+            student_info = f"Student ID: {matching_student.stu_id}, Name: {matching_student.name}, Student Name: {matching_student.chinese_name}"
             print(student_info)
             self.config_label(text=student_info, x=100, y=280)
             self.image_display(matching_student.avatar, x=180, y=300, width=280, height=280)
@@ -103,40 +120,48 @@ class FindStudentFrame(CommonFrame):
             print(no_student_info)
             self.config_label(text=no_student_info, x=100, y=280)
 
-
 class SetNameFrame(CommonFrame):
     def __init__(self, parent, student_model):
         super().__init__(parent, student_model)        
         self.current_student_index = 0  # Index to track the current student
         self.students = self.student_model.fetch_all_students()  # Fetch all students
+        self.success_lable = self.create_notification("", 100, 460)
         self.create_widgets()
 
     def create_widgets(self):
         self.title = self.create_title("Set Name", 100, 40)
+
+        # Button to switch to the next student
+        self.next_student_button = self.create_button("Next Student", self.next_student_command, 400, 380)
+        self.previous_student_button = self.create_button("Previous Student", self.previous_student_command, 100, 380)
+
+        # Entry show
+        self.name_label = self.create_label("Name:", 100, 440)
+        self.name_entry = self.create_entry("", 200, 440)
+
+        # Save button
+        self.save_button = self.create_button("Save", self.save_command, 250, 500)
+
         # Display initial student information
         self.display_student_info()
 
-        # Button to switch to the next student
-        next_student_button = self.create_button("Next Student", self.next_student_command, 250, 240)
-        previous_student_button = self.create_button("Previous Student", self.previous_student_command, 100, 240)
-
     def display_student_info(self):
         # Display student information based on the current index
-        if 0 <= self.current_student_index < len(self.students):
-            current_student = self.students[self.current_student_index]
-            student_info = f"Student ID: {current_student.stu_id}, Name: {current_student.name}"
-            self.config_label(text=student_info, x=100, y=280)
-            self.image_display(current_student.avatar, x=180, y=300, width=280, height=280)
-        else:
-            # No more students to display
-            self.config_label(text="No more students.", x=100, y=280)
-            self.image_clean(x=180, y=300, width=280, height=280)
+        current_student = self.students[self.current_student_index]
+        student_info = f"Student ID: {current_student.stu_id}, Name: {current_student.name}, Student Name: {current_student.chinese_name}"
+        self.config_label(text=student_info, x=100, y=80)
+        self.image_display(current_student.avatar, x=180, y=100, width=280, height=280)
+        self.reset_entry(self.name_entry)
 
     def next_student_command(self):
         # Move to the next student
         self.current_student_index += 1
         # Display information for the next student
         self.display_student_info()
+        if self.current_student_index >= len(self.students)-2:
+            # Reset to the first student if at the end
+            self.current_student_index = 1
+            self.display_student_info()
     
     def previous_student_command(self):
         # Move to the previous student
@@ -147,7 +172,21 @@ class SetNameFrame(CommonFrame):
             # Reset to the last student if at the beginning
             self.current_student_index = len(self.students) - 1
             self.display_student_info()
-
+   
+    def save_command(self):
+        if 0 <= self.current_student_index < len(self.students):
+            current_student = self.students[self.current_student_index]
+            chinese_name = self.name_entry.get()
+            # Save Chinese name to the database
+            self.student_model.set_chinese_name(current_student.stu_id, chinese_name)
+            # Update the local current student with the new Chinese name
+            current_student.chinese_name = chinese_name
+            # Update and display the latest student information
+            self.display_student_info()
+            self.success_notification = f"Saved Chinese name '{chinese_name}' for student ID {current_student.stu_id}"
+            print(self.success_notification)
+            self.success_lable = self.create_notification(self.success_notification , 100, 460)
+            self.display_student_info()
 
 class Frontend:
     def __init__(self):
@@ -178,7 +217,6 @@ class Frontend:
         return root
     def run(self):
         self.root.mainloop()
-
 
 if __name__ == "__main__":
     frontend = Frontend()
